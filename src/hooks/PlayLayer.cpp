@@ -5,7 +5,7 @@
 #include "hooks/PauseLayer.hpp"
 #include "hooks/FMODAudioEngine.hpp"
 #if !defined(GEODE_IS_IOS)
-#include <geode.custom-keybinds/include/Keybinds.hpp>
+#include <Geode/loader/SettingV3.hpp>
 #endif
 #include <util/algorithm.hpp>
 #include <util/filesystem.hpp>
@@ -272,9 +272,11 @@ bool PSPlayLayer::validSaveExists() {
 
 #if !defined(GEODE_IS_IOS)
 void PSPlayLayer::setupKeybinds() {
-    addEventListener<keybinds::InvokeBindFilter>(
-        [this](keybinds::InvokeBindEvent* event) {
-            if (event->isDown() && canSave() && startSaveGame()) {
+    // Use the built-in Geode v5 keybind setting listener
+    this->addEventListener(
+        KeybindSettingPressedEventV3(Mod::get(), "save-game"),
+        [this](Keybind const& keybind, bool down, bool repeat, double timestamp) {
+            if (down && !repeat && canSave() && startSaveGame()) {
                 PSPauseLayer* l_pauseLayer = static_cast<PSPauseLayer*>(CCScene::get()->getChildByID("PauseLayer"));
                 if (l_pauseLayer) {
                     if (l_pauseLayer->m_fields->m_saveCheckpointsSprite != nullptr) l_pauseLayer->m_fields->m_saveCheckpointsSprite->setColor({127,127,127});
@@ -282,9 +284,7 @@ void PSPlayLayer::setupKeybinds() {
                     if (l_pauseLayer->m_fields->m_saveCheckpointsButton != nullptr) l_pauseLayer->m_fields->m_saveCheckpointsButton->m_bEnabled = false;
                 }
             }
-            return ListenerResult::Propagate;
-        },
-        "save-game"_spr
+        }
     );
 }
 #endif
@@ -393,7 +393,6 @@ bool PSPlayLayer::canSave() {
 }
 
 bool PSPlayLayer::savesEnabled() {
-    //log::info("savesEnabled: {}", Mod::get()->getSettingValue<bool>("editor-saves") || m_level->m_levelType != GJLevelType::Editor);
     return Mod::get()->getSettingValue<bool>("editor-saves") || ((m_level) && m_level->m_levelType != GJLevelType::Editor);
 }
 
@@ -444,21 +443,17 @@ bool PSPlayLayer::makeBackup() {
     }
 
     l_filePath.append(fmt::format(".{}.bak",m_fields->m_readPSFVersion));
-    //log::info("Backup file path: {}", l_filePath);
     if (!m_fields->m_backupStream.setFile(l_filePath, true)) {
         return false;
     }
 
-    //initialize buffer
     std::vector<char> buf(m_fields->m_bytesToRead);
 
-    //read all the file into it and restore previous state (offset and bytes read)
     m_fields->m_stream.seek(0);
     m_fields->m_stream.read(buf.data(), m_fields->m_bytesToRead);
     m_fields->m_stream.seek(sizeof(s_psfMagicAndVer));
     m_fields->m_bytesRead = sizeof(s_psfMagicAndVer);
 
-    //write the buffer into a file as a backup
     m_fields->m_backupStream.write(buf.data(), m_fields->m_bytesToRead);
     m_fields->m_backupStream.end();
 
