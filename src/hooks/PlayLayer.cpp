@@ -16,17 +16,17 @@ using namespace persistenceAPI;
 using namespace util::platform;
 
 #if defined(GEODE_IS_WINDOWS)
-    #define UNIQUE_ID_OFFSET 0x69c158
+    #define UNIQUE_ID_OFFSET 0x7b5878
 #elif defined(GEODE_IS_ANDROID64)
-    #define UNIQUE_ID_OFFSET 0x11fe018
+    #define UNIQUE_ID_OFFSET 0x13380e0
 #elif defined(GEODE_IS_ANDROID32)
-    #define UNIQUE_ID_OFFSET 0xa9f00c
+    #define UNIQUE_ID_OFFSET 0xbc6334
 #elif defined(GEODE_IS_ARM_MAC)
-    #define UNIQUE_ID_OFFSET 0x8aa39c
+    #define UNIQUE_ID_OFFSET 0x9429c0
 #elif defined(GEODE_IS_INTEL_MAC)
-    #define UNIQUE_ID_OFFSET 0x985500
+    #define UNIQUE_ID_OFFSET 0xa48080
 #elif defined(GEODE_IS_IOS)
-    #define UNIQUE_ID_OFFSET 0x83f2e8
+    #define UNIQUE_ID_OFFSET 0x9099e8
 #endif
 
 // Max PSF version is 31 cause after that bitfield is broken
